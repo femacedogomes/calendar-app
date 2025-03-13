@@ -69,6 +69,23 @@ export default function Home() {
         )
       );
   };
+
+  const handleUpdateEvent = async (event: IEvent) => {
+    await eventService
+      .update(event)
+      .then((res) => {
+        setEvents((prevEvents) =>
+          prevEvents.map((e) => (e._id === res._id ? res : e))
+        );
+        setSuccessMessage("Evento atualizado com sucesso!");
+        setErrorMessage("");
+      })
+      .catch((err) => {
+        setSuccessMessage("");
+        setErrorMessage(err.message);
+      });
+  };
+
   const handleCreateEvent = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     await eventService
@@ -160,7 +177,9 @@ export default function Home() {
         </button>
       </div>
 
-      {events.length > 0 ? (
+      {events.length === 0 && !groupedEvents ? (
+        <h2 className="h2 text-black">Você não possui nenhum evento marcado</h2>
+      ) : (
         <div className="overflow-auto w-100">
           <div className="row flex-nowrap p-4 custom-flex">
             {Object.entries(groupedEvents as Record<string, IEvent[]>)
@@ -196,6 +215,7 @@ export default function Home() {
                           event={event}
                           key={event._id}
                           onDeleteEvent={handleDeleteEvent}
+                          onUpdateEvent={handleUpdateEvent}
                         />
                       ))}
                     </div>
@@ -204,8 +224,6 @@ export default function Home() {
               })}
           </div>
         </div>
-      ) : (
-        <h2 className="h2 text-black">Você não possui nenhum evento marcado</h2>
       )}
     </div>
   );

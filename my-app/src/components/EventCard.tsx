@@ -1,5 +1,4 @@
-import eventService from "@/services/eventService";
-import { IEvent, IUser } from "@/services/types";
+import { IEvent } from "@/services/types";
 import { getCountdown } from "@/util/getCountDown";
 import { useDateFormater } from "@/util/useDateFormater";
 import { useEffect, useState } from "react";
@@ -11,9 +10,14 @@ const apiUrl = process.env.NEXT_PUBLIC_APP_URL;
 interface IEventCard {
   event: IEvent;
   onDeleteEvent: (eventId: string) => Promise<void>;
+  onUpdateEvent: (eventId: IEvent) => Promise<void>;
 }
 
-export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
+export const EventCard = ({
+  event,
+  onDeleteEvent,
+  onUpdateEvent,
+}: IEventCard) => {
   const { title, description, attendees, startTime, endTime, _id, createdBy } =
     event;
   const [updatedEvent, setUpdatedEvent] = useState<IEvent>(event);
@@ -30,6 +34,10 @@ export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
     await onDeleteEvent(event._id);
   };
 
+  const handleEditEvent = async () => {
+    await onUpdateEvent(updatedEvent);
+  };
+
   const cardStyle = {
     border: isEventOngoing
       ? "2px solid #FFA500"
@@ -37,13 +45,6 @@ export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
       ? "2px solid #FF0000"
       : "",
     maxWidth: "450px",
-  };
-
-  const handleEditEvent = async (
-    formEvent: React.FormEvent<HTMLFormElement>
-  ) => {
-    formEvent.preventDefault();
-    await eventService.update(updatedEvent);
   };
 
   const copyInviteLinkToClipboard = () => {
@@ -59,8 +60,7 @@ export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
     return () => clearInterval(timer);
   }, [startTime]);
 
-  useEffect(() => {
-  }, [user]);
+  useEffect(() => {}, [user]);
   return (
     <div className="card mb-4 shadow mw-50" style={cardStyle}>
       <div
