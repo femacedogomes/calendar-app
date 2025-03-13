@@ -35,7 +35,7 @@ const eventService = {
   },
 
   async delete(eventId: string) {
-    return baseService.delete(`/event/${eventId}`);
+    baseService.delete(`/event/${eventId}`);
   },
 };
 

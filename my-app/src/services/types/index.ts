@@ -6,9 +6,15 @@ export interface IEvent {
   description: string;
   startTime: string;
   endTime: string;
-  createdBy: string;
+  createdBy: ICreateBy;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ICreateBy {
+  name: string;
+  email: string;
+  id: string;
 }
 
 export interface IUser {
@@ -17,7 +23,7 @@ export interface IUser {
   name: string;
   email: string;
   id: string;
-};
+}
 
 export interface IUserSession {
   events: IEvent[];
@@ -32,4 +38,10 @@ export interface IUserSession {
       expires: string;
     };
   };
+}
+
+export interface IRequestError {
+  code: number;
+  message: string;
+  stack: string;
 }

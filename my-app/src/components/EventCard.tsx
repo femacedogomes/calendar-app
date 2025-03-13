@@ -1,11 +1,12 @@
 import eventService from "@/services/eventService";
-import { IEvent } from "@/services/types";
+import { IEvent, IUser } from "@/services/types";
 import { getCountdown } from "@/util/getCountDown";
 import { useDateFormater } from "@/util/useDateFormater";
 import { useEffect, useState } from "react";
 import { EventForm } from "./EventForm";
+import useLocalStorage from "@/util/useLocalStorage";
 
-const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 interface IEventCard {
   event: IEvent;
@@ -13,13 +14,15 @@ interface IEventCard {
 }
 
 export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
-  const { title, description, attendees, startTime, endTime, _id } = event;
+  const { title, description, attendees, startTime, endTime, _id, createdBy } =
+    event;
   const [updatedEvent, setUpdatedEvent] = useState<IEvent>(event);
   const [countdown, setCountdown] = useState(getCountdown(startTime));
   const now = new Date();
   const eventStart = new Date(startTime);
   const eventEnd = new Date(endTime);
-
+  const user = useLocalStorage.getItemFromLocalStorage("user");
+  const parsedUser = JSON.parse(user as string);
   const isEventOngoing = now >= eventStart && now <= eventEnd;
   const isEventEnded = now > eventEnd;
 
@@ -33,6 +36,7 @@ export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
       : isEventEnded
       ? "2px solid #FF0000"
       : "",
+    maxWidth: "450px",
   };
 
   const handleEditEvent = async (
@@ -43,7 +47,7 @@ export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
   };
 
   const copyInviteLinkToClipboard = () => {
-    const inviteLink = `${apiUrl}/event/${_id}/invite`;
+    const inviteLink = `${apiUrl}/invite/${_id}`;
     navigator.clipboard.writeText(inviteLink);
   };
 
@@ -55,8 +59,12 @@ export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
     return () => clearInterval(timer);
   }, [startTime]);
 
+  useEffect(() => {
+    console.log("USER:", parsedUser);
+    console.log("CRIADO POR:", createdBy.id);
+  }, [user]);
   return (
-    <div className="card mb-4 shadow" style={cardStyle}>
+    <div className="card mb-4 shadow mw-50" style={cardStyle}>
       <div
         className="modal fade"
         id={`UpdateEventModal-${_id}`}
@@ -91,11 +99,11 @@ export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
         </div>
       </div>
       <div className="card-body">
-        <div className="card-header d-flex justify-content-between bg-white ">
+        <div className="card-header  justify-content-between bg-white ">
           <h2 className="h2 card-title">{title}</h2>
           {countdown.seconds > 0 && (
             <p className="p">
-              Inicia em: <br /> {countdown.days > 0 && countdown.days + "d"}{" "}
+              Inicia em: {countdown.days > 0 && countdown.days + "d"}{" "}
               {countdown.hours > 0 && countdown.hours + "h"}{" "}
               {countdown.minutes > 0 && countdown.minutes + "m"}{" "}
               {countdown.seconds}s
@@ -103,7 +111,7 @@ export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
           )}
         </div>
         <p className="lead card-text">{description}</p>
-        <div className="d-flex justify-content-between">
+        <div className="d-flex flex-wrap justify-content-between">
           <p>
             Início:
             {useDateFormater(startTime)}
@@ -114,27 +122,29 @@ export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
           </p>
         </div>
         número de convidados: {attendees.length}
-        <div className="d-flex justify-content-between">
-          <button
-            type="button"
-            onClick={copyInviteLinkToClipboard}
-            className="btn btn-link"
-          >
-            copiar link de convite
-          </button>
-          <div className="d-flex gap-2">
-            <button className="btn btn-danger" onClick={handleDelete}>
-              Deletar
-            </button>
+        {createdBy.id == parsedUser?.id && (
+          <div className="d-flex justify-content-between flex-wrap">
             <button
-              className="btn btn-primary"
-              data-bs-toggle="modal"
-              data-bs-target={`#UpdateEventModal-${_id}`}
+              type="button"
+              onClick={copyInviteLinkToClipboard}
+              className="btn btn-link"
             >
-              Editar
+              copiar link de convite
             </button>
+            <div className="d-flex gap-2">
+              <button className="btn btn-danger" onClick={handleDelete}>
+                Deletar
+              </button>
+              <button
+                className="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target={`#UpdateEventModal-${_id}`}
+              >
+                Editar
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

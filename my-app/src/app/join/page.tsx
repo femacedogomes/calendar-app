@@ -17,7 +17,9 @@ export default function SignInAndLogIn() {
   const saveUserAndRedirect = (res: IUserSession) => {
     useLocalStorage.setItemInLocalStorage("user", JSON.stringify(res.user));
     useLocalStorage.setItemInLocalStorage("authToken", res.tokens.access.token);
-    router.push("/");
+    const params = new URLSearchParams(window.location.search);
+    const redirectUrl = params.get("redirect") || "/";
+    router.push(redirectUrl);
   };
 
   const handleSubmit = useCallback(
@@ -32,9 +34,9 @@ export default function SignInAndLogIn() {
           saveUserAndRedirect(res);
         } else {
           const res: IUserSession = await authService.register(
-            joinFormData.name,
             joinFormData.email,
-            joinFormData.password
+            joinFormData.password,
+            joinFormData.name
           );
           saveUserAndRedirect(res);
         }

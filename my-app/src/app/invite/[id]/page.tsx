@@ -1,34 +1,27 @@
 "use client";
 
-import { Events } from "@/data";
 import eventService from "@/services/eventService";
 import { IEvent } from "@/services/types";
 import { useDateFormater } from "@/util/useDateFormater";
 import localStorageUtils from "@/util/useLocalStorage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function InvitePage({ params }: PageProps) {
-  const { id } = params;
+  const resolvedParams = use(params);
+  const id = resolvedParams.id;
   const [event, setEvent] = useState<IEvent>();
   const [responseMessage, setResponseMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const token = localStorageUtils.getItemFromLocalStorage("authToken");
-
-  useEffect(() => {
-    setEvent(Events[0]);
-  }, []);
-
-  const formattedStartDate = useDateFormater(event.startTime);
-  const formattedEndDate = useDateFormater(event.endTime);
 
   const handleAcceptInvite = async () => {
     setIsLoading(true);
@@ -53,13 +46,43 @@ export default function InvitePage({ params }: PageProps) {
       });
   };
 
+  const getEventByID = async () => {
+    setIsLoading(true);
+    await eventService
+      .getById(id)
+      .then((res) => {
+        console.log(res);
+        setEvent(res);
+      })
+      .catch((err) => {
+        if (err.message == "Please authenticate") {
+          router.push(`/join?redirect=/invite/${id}`);
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    getEventByID();
+    setIsLoading(false);
+  }, []);
+
+  const formattedStartTime = event ? useDateFormater(event.startTime) : "";
+  const formattedEndTime = event ? useDateFormater(event.endTime) : "";
+
+  if (isLoading) {
+    return <div>Carregando...</div>;
+  }
+
   if (!token) {
     return (
       <div className="container mt-5">
-        <div className="alert alert-danger" role="alert">
+        <h1 className="alert alert-danger text-center" role="alert">
           Você precisa estar logado para entrar no evento.
-        </div>
-        <button className="btn btn-primary">
+        </h1>
+        <button className="btn btn-primary d-block mx-auto">
           <Link
             href={{
               pathname: "/join",
@@ -75,29 +98,26 @@ export default function InvitePage({ params }: PageProps) {
     );
   }
 
-  if (!event) {
-    return (
-      <div className="container mt-5">
-        <div className="alert alert-danger" role="alert">
-          Evento não encontrado.
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mt-5">
-      <h1>Convite para o evento: {event?.title}</h1>
-      <p>Descrição: {event?.description}</p>
-      <p>início: {formattedStartDate}</p>
-      <p>térmico: {formattedEndDate}</p>
-      <button
-        className="btn btn-primary"
-        disabled={!isLoading}
-        onClick={handleAcceptInvite}
-      >
-        Deseja participar?
-      </button>
+    <div className="card mt-5 grid gap-0 row-gap-3">
+      <div className="card-body p-10">
+        <h1 className="card-title text-center">
+          Convite para o evento: {event?.title}
+        </h1>
+        <p className="card-subtitle text-center">
+          Descrição: {event?.description}
+        </p>
+        <div className="d-flex justify-content-evenly">
+          <p>início: {formattedStartTime}</p>
+          <p>término: {formattedEndTime}</p>
+        </div>
+        <button
+          className="btn btn-primary d-block mx-auto"
+          onClick={handleAcceptInvite}
+        >
+          Deseja participar?
+        </button>
+      </div>
       {responseMessage}
     </div>
   );

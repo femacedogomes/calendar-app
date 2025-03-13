@@ -50,20 +50,20 @@ export default function Home() {
       const res: IEvent[] = await eventService.getAll();
       console.log(res);
       setEvents(res);
-    } catch (err) {
-      console.log(err);
+    } catch {
+      router.push("/join");
     }
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    try {
-      await eventService.delete(eventId);
-      setEvents(events.filter(event => event._id !== eventId));
-    } catch (err) {
-      console.log(err);
-    }
+    await eventService
+      .delete(eventId)
+      .then(() =>
+        setEvents((prevEvents) =>
+          prevEvents.filter((event) => event._id !== eventId)
+        )
+      );
   };
-
   const handleCreateEvent = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
@@ -73,6 +73,12 @@ export default function Home() {
     } catch (err) {
       console.log(err);
     }
+  };
+
+  const handleLogout = () => {
+    useLocalStorage.removeItemFromLocalStorage("authToken");
+    useLocalStorage.removeItemFromLocalStorage("user");
+    router.push("/join");
   };
 
   useEffect(() => {
@@ -119,6 +125,12 @@ export default function Home() {
         </div>
       </div>
 
+      <div className="d-flex">
+        <button className="btn btn-danger ms-auto" onClick={handleLogout}>
+          Deslogar
+        </button>
+      </div>
+
       <h2 className="text-center text-black p-4">Olá! {userSession?.name}</h2>
       <div className="d-flex justify-content-between align-items-center">
         <h1 className="h1 text-black">Eventos</h1>
@@ -134,10 +146,7 @@ export default function Home() {
 
       {events.length > 0 ? (
         <div className="overflow-auto w-100">
-          <div
-            className="row flex-nowrap p-4"
-            style={{ minWidth: "max-content" }}
-          >
+          <div className="row flex-nowrap p-4 custom-flex">
             {Object.entries(groupedEvents as Record<string, IEvent[]>)
               .sort(
                 ([dateA], [dateB]) =>
@@ -151,7 +160,11 @@ export default function Home() {
                 );
 
                 return (
-                  <div key={date} className="col-md-4 mb-4 border-end">
+                  <div
+                    key={date}
+                    className="col-md-4 mb-4 border-end custom-col"
+                    style={{ maxWidth: "450px" }}
+                  >
                     <h3 className="h5 mb-3 text-black text-center">
                       {new Date(date).toLocaleDateString("pt-BR", {
                         weekday: "long",
