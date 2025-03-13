@@ -10,6 +10,10 @@ const eventService = {
     return baseService.get(`/event/${eventId}`);
   },
 
+  async acceptInvite(eventId: string) {
+    return baseService.post(`/event/${eventId}/invite`);
+  },
+
   async create(event: IEvent) {
     const eventBody = {
       title: event.title,

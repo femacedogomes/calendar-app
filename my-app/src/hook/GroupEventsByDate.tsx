@@ -3,7 +3,7 @@ import { IEvent } from "@/services/types";
 export const useGroupEventsByDate = (events: IEvent[]) => {
   const groupEventsByDate = () => {
     const grouped = events.reduce<Record<string, IEvent[]>>((acc, event) => {
-      const date = new Date(event.startTime).toLocaleDateString("pt-BR"); // Garantindo formato padrão
+      const date = new Date(event.startTime).toISOString().split("T")[0];
       if (!acc[date]) {
         acc[date] = [];
       }

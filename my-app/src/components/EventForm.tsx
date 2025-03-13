@@ -1,19 +1,15 @@
+import { IEvent } from "@/services/types";
 import React from "react";
 
-export interface IEventForm {
-  title: string;
-  description: string;
-  startTime: string;
-  endTime: string;
-}
-
 interface ICreateEventForm {
-  eventFormData: IEventForm;
-  setEventFormData: React.Dispatch<React.SetStateAction<IEventForm>>;
+  eventFormData: IEvent;
+  setEventFormData: React.Dispatch<React.SetStateAction<IEvent>>;
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
 }
-export const CreateEventForm = ({
+export const EventForm = ({
   eventFormData,
   setEventFormData,
+  onSubmit,
 }: ICreateEventForm) => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -21,13 +17,14 @@ export const CreateEventForm = ({
     setEventFormData({ ...eventFormData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Dados enviados:", eventFormData);
+  const formatDateForInput = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toISOString().slice(0, 16); // Pega apenas "YYYY-MM-DDTHH:MM"
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={onSubmit}>
       <div className="mb-3">
         <label className="form-label text-black">Título</label>
         <input
@@ -56,8 +53,11 @@ export const CreateEventForm = ({
           type="datetime-local"
           className="form-control"
           name="startTime"
-          value={eventFormData.startTime}
-          onChange={handleChange}
+          value={formatDateForInput(eventFormData.startTime)}
+          onChange={(e) => {
+            const newDate = e.target.value;
+            setEventFormData({ ...eventFormData, startTime: newDate });
+          }}
           required
         />
       </div>
@@ -68,8 +68,11 @@ export const CreateEventForm = ({
           type="datetime-local"
           className="form-control"
           name="endTime"
-          value={eventFormData.endTime}
-          onChange={handleChange}
+          value={formatDateForInput(eventFormData.endTime)}
+          onChange={(e) => {
+            const newDate = e.target.value;
+            setEventFormData({ ...eventFormData, endTime: newDate });
+          }}
           required
         />
       </div>

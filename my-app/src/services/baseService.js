@@ -1,11 +1,9 @@
-import localStorageUtils from "@/util/useLocalStorage";
+import useLocalStorage from "@/util/useLocalStorage";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL; // Substitua pelo endereço correto da API
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export const baseService = {
   async request(url, method, data = null) {
-    const token = localStorageUtils.getItemFromLocalStorage<string>("token");
-
+    const token = useLocalStorage.getItemFromLocalStorage("authToken");
     const headers = {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
