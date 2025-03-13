@@ -6,7 +6,7 @@ export interface IEvent {
   description: string;
   startTime: string;
   endTime: string;
-  createdBy: ICreateBy;
+  createdBy: ICreateBy | string;
   createdAt: string;
   updatedAt: string;
 }

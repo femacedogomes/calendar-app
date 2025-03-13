@@ -19,7 +19,11 @@ const initialEventFormData = {
   status: "",
   createdAt: "",
   updatedAt: "",
-  createdBy: "",
+  createdBy: {
+    name: "",
+    email: "",
+    id: "",
+  },
 };
 
 export default function Home() {
@@ -27,6 +31,8 @@ export default function Home() {
   const [eventFormData, setEventFormData] =
     useState<IEvent>(initialEventFormData);
   const [userSession, setUserSession] = useState<IUser>();
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
@@ -48,7 +54,6 @@ export default function Home() {
   const getEvents = async () => {
     try {
       const res: IEvent[] = await eventService.getAll();
-      console.log(res);
       setEvents(res);
     } catch {
       router.push("/join");
@@ -66,13 +71,18 @@ export default function Home() {
   };
   const handleCreateEvent = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    try {
-      const res = await eventService.create(eventFormData);
-      setEvents([...events, res]);
-      setEventFormData(initialEventFormData);
-    } catch (err) {
-      console.log(err);
-    }
+    await eventService
+      .create(eventFormData)
+      .then((res) => {
+        setEvents((prevEvents) => [...prevEvents, res]);
+        setEventFormData(initialEventFormData);
+        setSuccessMessage("Evento criado com sucesso!");
+        setErrorMessage("");
+      })
+      .catch((err) => {
+        setSuccessMessage("");
+        setErrorMessage(err.message);
+      });
   };
 
   const handleLogout = () => {
@@ -120,6 +130,12 @@ export default function Home() {
                 setEventFormData={setEventFormData}
                 onSubmit={handleCreateEvent}
               />
+              {errorMessage && (
+                <div className="alert alert-danger">{errorMessage}</div>
+              )}
+              {successMessage && (
+                <div className="alert alert-success">{successMessage}</div>
+              )}
             </div>
           </div>
         </div>

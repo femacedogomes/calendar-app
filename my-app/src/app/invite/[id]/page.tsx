@@ -118,7 +118,11 @@ export default function InvitePage({ params }: PageProps) {
           Deseja participar?
         </button>
       </div>
-      {responseMessage}
+      {responseMessage && (
+        <div className="alert alert-success text-center" role="alert">
+          {responseMessage}
+        </div>
+      )}
     </div>
   );
 }

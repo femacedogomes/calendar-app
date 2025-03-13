@@ -60,8 +60,6 @@ export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
   }, [startTime]);
 
   useEffect(() => {
-    console.log("USER:", parsedUser);
-    console.log("CRIADO POR:", createdBy.id);
   }, [user]);
   return (
     <div className="card mb-4 shadow mw-50" style={cardStyle}>
@@ -122,7 +120,7 @@ export const EventCard = ({ event, onDeleteEvent }: IEventCard) => {
           </p>
         </div>
         número de convidados: {attendees.length}
-        {createdBy.id == parsedUser?.id && (
+        {createdBy == parsedUser?.id && (
           <div className="d-flex justify-content-between flex-wrap">
             <button
               type="button"
