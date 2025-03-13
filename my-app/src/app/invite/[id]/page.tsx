@@ -51,7 +51,6 @@ export default function InvitePage({ params }: PageProps) {
     await eventService
       .getById(id)
       .then((res) => {
-        console.log(res);
         setEvent(res);
       })
       .catch((err) => {

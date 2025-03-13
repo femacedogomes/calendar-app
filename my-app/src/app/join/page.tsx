@@ -40,9 +40,7 @@ export default function SignInAndLogIn() {
           );
           saveUserAndRedirect(res);
         }
-      } catch (err) {
-        console.log("error:", err);
-      }
+      } catch {}
     },
     [isLogin, joinFormData, router]
   );
