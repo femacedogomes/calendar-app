@@ -12,8 +12,8 @@ import eventService from "@/services/eventService";
 const initialEventFormData = {
   title: "",
   description: "",
-  startTime: "",
-  endTime: "",
+  startTime: new Date().toISOString().slice(0, 16),
+  endTime: new Date(new Date().getTime() + 3600000).toISOString().slice(0, 16), 
   attendees: [],
   _id: "",
   status: "",

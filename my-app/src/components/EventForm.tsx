@@ -20,7 +20,8 @@ export const EventForm = ({
   const formatDateForInput = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toISOString().slice(0, 16); // Pega apenas "YYYY-MM-DDTHH:MM"
+    date.setHours(date.getHours() - 3);
+    return date.toISOString().slice(0, 16);
   };
 
   return (
@@ -55,8 +56,7 @@ export const EventForm = ({
           name="startTime"
           value={formatDateForInput(eventFormData.startTime)}
           onChange={(e) => {
-            const newDate = e.target.value;
-            setEventFormData({ ...eventFormData, startTime: newDate });
+            setEventFormData({ ...eventFormData, startTime: e.target.value });
           }}
           required
         />
@@ -70,8 +70,7 @@ export const EventForm = ({
           name="endTime"
           value={formatDateForInput(eventFormData.endTime)}
           onChange={(e) => {
-            const newDate = e.target.value;
-            setEventFormData({ ...eventFormData, endTime: newDate });
+            setEventFormData({ ...eventFormData, endTime: e.target.value });
           }}
           required
         />
